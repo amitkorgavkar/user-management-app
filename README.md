@@ -18,7 +18,7 @@ A full-featured user management web application built with **Node.js**, **Expres
 - View all users in a table
 - Edit a user's username (with password verification)
 - Add random fake users for testing (using Faker.js)
-- Delete user (coming soon)
+- Delete user
 - Secure DB credentials via `.env` file
 - SQL injection prevention using prepared statements
 
