@@ -86,8 +86,8 @@ http://localhost:8080
 ## Known Limitations
 
 - Passwords are stored as plain text — bcrypt hashing will be added in a future update
-- Delete route coming soon
-- No frontend framework used — pure EJS templating
+- Delete route also available
+- No frontend framework used — pure EJS templating 
 
 ## Notes
 
