@@ -5,6 +5,8 @@ const app = express();
 const methodOverride = require("method-override");
 const path = require("path");
 require("dotenv").config();
+const { v4 : uuidv4 } = require("uuid");
+
 
 app.use(methodOverride("_method"));
 app.use(express.urlencoded({ extended: true }));
@@ -74,6 +76,28 @@ app.get("/users/:id/edit", (req, res) => {
   }
 });
 
+//Rendering new form 
+app.get("/users/new", (req, res) =>{
+  res.render("new.ejs")
+})
+
+//Adding new user
+app.post("/users", (req, res) =>{
+  let id = uuidv4()
+  let q = 'INSERT INTO user (id, username, email, password) VALUES (?)';
+  let { username, email, password } = req.body;
+  let data = [id, username, email, password];
+  try {
+    connection.query(q, [ data ], (err, result) => {
+      if (err) throw err;
+      res.redirect("/users");
+    });
+  } catch (err) {
+    console.log(err);
+    res.send("Some error in DB");
+  }
+})
+
 // Update Route — verify password then update username
 app.patch("/users/:id", (req, res) => {
   let { id } = req.params;
@@ -99,20 +123,35 @@ app.patch("/users/:id", (req, res) => {
   }
 });
 
-// Add new random user (for testing/demo purposes)
-app.post("/users", (req, res) => {
-  let randomUser = getRandomUser();
-  let q = `INSERT INTO user (id, username, email, password) VALUES (?)`;
-  try {
-    connection.query(q, [randomUser], (err, result) => {
-      if (err) throw err;
-      res.redirect("/users");
-    });
-  } catch (err) {
-    console.log(err);
-    res.send("Some error in DB");
+app.get("/users/:id/deleteUser", (req, res) =>{
+  let { id } = req.params;
+  res.render("deleteUser.ejs", { id })
+})
+
+app.delete("/users/:id", (req, res) =>{
+  let { id } = req.params;
+  let { email : formEmail, password : formPass } = req.body;
+  let q = 'SELECT * FROM user WHERE id = ?'
+  try{
+    connection.query(q, [id], (err, result) =>{
+      let user = result[0];
+      if(formEmail === user.email && formPass === user.password){
+        let q2 = 'DELETE FROM user WHERE id=?';
+        connection.query(q2, [id], (err, result) =>{
+          if(err) throw err;
+          res.redirect("/users")
+        })
+      } 
+      else{
+        res.send("Caught some err")
+      }
+    })
   }
-});
+  catch(err){
+    console.log(err);
+    res.send("Some err in DB")
+  }
+})
 
 app.listen(8080, () => {
   console.log(`Server is listening on port 8080`);
